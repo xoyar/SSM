@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper   
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+
+<mapper namespace="com.xoyar.cms.mapper.DeptMapper">
+	 
+	<sql id="all_dept_columns">
+   		 ID,PARENT_ID,NAME,SORT,CODE,
+   		 ADDRESS,MASTER,PHONE,FAX,EMAIL,
+   		 UPDATE_BY,UPDATE_DATE,REMARKS
+  	</sql>
+	 
+	<select id="getDeptListByUserId" parameterType="int" resultType="dept">
+		SELECT C.ID,C.PARENT_ID,C.NAME,C.SORT,C.CODE ,
+		C.ADDRESS,C.MASTER,C.PHONE,C.FAX,C.EMAIL,
+		C.UPDATE_BY,C.UPDATE_DATE,C.REMARKS
+		FROM PM_SYS_USER_ROLE A ,PM_SYS_ROLE_DEPT B ,PM_SYS_DEPT C 
+		WHERE A.USER_ID=#{userId} AND A.ROLE_ID = B.ROLE_ID AND B.DEPT_ID = C.ID 
+	</select> 
+	
+	<select id="getAllDeptList"  resultType="dept">
+		SELECT  
+		<include refid="all_dept_columns" />
+		FROM PM_SYS_DEPT
+	</select> 
+	 
+	<select id="getDeptById" parameterType="int" resultType="dept"> 
+		<!--此处稍微有点特殊,需要讲父节点名称查出来  -->
+		SELECT  C.ID,C.PARENT_ID,D.NAME AS PARENT_NAME,C.NAME,
+ 		C.SORT,C.CODE,C.ADDRESS,C.MASTER,C.PHONE,C.FAX,C.EMAIL,
+ 		C.UPDATE_BY,C.UPDATE_DATE,C.REMARKS
+		FROM PM_SYS_DEPT C LEFT JOIN PM_SYS_DEPT D 
+		ON C.PARENT_ID=D.ID WHERE C.ID = #{ID}	
+	</select>
+	
+	<select id="getChildCount" parameterType="int" resultType="int">
+		SELECT COUNT(*) FROM PM_SYS_DEPT WHERE PARENT_ID= #{ID}
+	</select>
+	
+	
+	 <!--增加单条用户记录  -->
+	<insert id="addDept" parameterType = "dept">		  
+		INSERT INTO PM_SYS_DEPT(PARENT_ID,NAME,SORT,CODE,
+					 ADDRESS,MASTER,PHONE,FAX,EMAIL,
+					UPDATE_BY, UPDATE_DATE,REMARKS)
+		VALUES(#{parentId},#{name},#{sort},#{code},
+				#{address},#{master},#{phone},#{fax},#{email},
+				#{updateBy},#{updateDate},#{remarks})
+	</insert>
+	 
+	<!--删除用户记录 -->
+	<delete id="delDept" parameterType="int">
+		DELETE FROM PM_SYS_DEPT WHERE ID=#{id}
+	</delete>
+
+	<!--修改-->
+	<update id="updateDept" parameterType = "dept">
+		UPDATE PM_SYS_DEPT  
+		<set> 				
+			<if test="parentId != null">
+	            PARENT_ID = #{parentId},
+	        </if>
+	        <if test="name != null">
+	            NAME = #{name},
+	        </if>	   
+	        <if test="sort != null">
+	            SORT = #{sort},
+	        </if>
+	        <if test="code != null">
+	            CODE = #{code},
+	        </if>	         
+ 	        <if test="master != null">
+	            ADDRESS = #{master},
+	        </if>
+	        <if test="master != null">
+	            MASTER = #{master},
+	        </if>	   
+	        <if test="phone != null">
+	            PHONE = #{phone},
+	        </if>
+	        <if test="fax != null">
+	            FAX = #{fax},
+	        </if>
+	        
+	        <if test="email != null">
+	            EMAIL = #{email},
+	        </if>	        
+	        <if test="updateBy != null">
+	            UPDATE_BY = #{updateBy},
+	        </if>
+	        <if test="updateDate != null">
+	            UPDATE_DATE = #{updateDate},
+	        </if>
+	        <if test="remarks != null">
+	            REMARKS = #{remarks},
+	        </if>		 
+		</set>
+		WHERE ID = #{id}
+	</update>
+ 
+</mapper>
